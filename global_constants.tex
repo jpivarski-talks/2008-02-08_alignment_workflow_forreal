@@ -1,0 +1,114 @@
+\documentclass[compress]{beamer}
+\usepackage{ifthen,verbatim}
+
+\title{Global Alignment Constants}
+\author{Jim Pivarski}
+\institute{Texas A\&M University}
+\date{25 January, 2008}
+
+\newcommand{\isnote}{}
+\xdefinecolor{lightyellow}{rgb}{1.,1.,0.25}
+\xdefinecolor{darkblue}{rgb}{0.1,0.1,0.7}
+
+%% Uncomment this to get annotations
+%% \def\notes{\addtocounter{page}{-1}
+%%            \renewcommand{\isnote}{*}
+%% 	   \beamertemplateshadingbackground{lightyellow}{white}
+%%            \begin{frame}
+%%            \frametitle{Notes for the previous page (page \insertpagenumber)}
+%%            \itemize}
+%% \def\endnotes{\enditemize
+%% 	      \end{frame}
+%%               \beamertemplateshadingbackground{white}{white}
+%%               \renewcommand{\isnote}{}}
+
+%% Uncomment this to not get annotations
+\def\notes{\comment}
+\def\endnotes{\endcomment}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{headline}{\includegraphics[height=1 cm]{../cmslogo} \hspace{0.1 cm} \includegraphics[height=1 cm]{../tamulogo} \hfill
+\begin{minipage}{5.5 cm}
+\vspace{-0.75 cm} \small
+\begin{center}
+\ifthenelse{\equal{\insertpagenumber}{1}}{}{\textcolor{blue}{\insertsection}}
+\end{center}
+\end{minipage} \hfill
+\begin{minipage}{4.5 cm}
+\vspace{-0.75 cm} \small
+\begin{flushright}
+\ifthenelse{\equal{\insertpagenumber}{1}}{}{Jim Pivarski \hspace{0.5 cm} \insertpagenumber\isnote/\pageref{numpages}}
+\end{flushright}
+\end{minipage}\mbox{\hspace{0.2 cm}}}
+
+\begin{document}
+\frame{\titlepage}
+
+%% \begin{notes}
+%% \item This is the annotated version of my talk.
+%% \item If you want the version that I am presenting, download the one
+%% labeled ``slides'' on Indico (or just ignore these yellow pages).
+%% \item The annotated version is provided for extra detail and a written
+%% record of comments that I intend to make orally.
+%% \item Yellow notes refer to the content on the {\it previous} page.
+%% \item All other slides are identical for the two versions.
+%% \end{notes}
+
+\begin{frame}
+\frametitle{Global alignment constants}
+
+Global alignment constants define a coordinate system for each major
+detector in CMS: tracker, ECAL, HCAL, muon barrel, and each of the two
+muon endcaps, so that internally-aligned detectors can all be aligned
+to a single global coordinate system.
+
+\vfill
+(This implementation is a combination of suggestions from Andrei, Frederic,
+Rainer, and myself.)
+\end{frame}
+
+\begin{frame}
+\begin{itemize}\setlength{\itemsep}{0.5 cm}
+\item New record, GlobalPositionRcd, in CondFormats/AlignmentRecord which would store an AlignTransform (6 numbers describing a translation and a rotation).  This record will contain an entry for each of the major detectors.
+\item Change ``applyAlignments'' to require alignment constants and GlobalPositionRcd
+
+\vspace{0.15 cm}
+\begin{enumerate}\setlength{\itemsep}{0.25 cm}
+\item Applies alignments (as before)
+\item Shifts and rotates whole system with appropriate GlobalPositionRcd entry
+\end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\begin{itemize}\setlength{\itemsep}{0.25 cm}
+\item Need to change every geometry producer, because GeometryAligner::applyAlignments now requires GlobalPositionRcd
+%% {\tt \scriptsize
+%% Alignment/CommonAlignmentProducer/plugins/AlignmentProducer.cc \\
+%% Alignment/LaserAlignment/plugins/LaserAlignment.cc \\
+%% Alignment/MuonAlignment/plugins/MisalignedMuonESProducer.cc \\
+%% Alignment/TrackerAlignment/plugins/MisalignedTrackerESProducer.cc \\
+%% Alignment/OfflineValidation/src/TrackerGeometryCompare.cc \\
+%% Alignment/OfflineValidation/src/MuonGeometryIntoNtuples.cc \\
+%% Geometry/CSCGeometryBuilder/plugins/CSCGeometryESModule.cc \\
+%% Geometry/DTGeometryBuilder/plugins/DTGeometryESModule.cc \\
+%% Geometry/TrackerGeometryBuilder/plugins/TrackerDigiGeometryESModule.cc \\
+%% }
+
+\item Compiler will find all instances
+
+\item Corresponding implementation for ECAL and HCAL would need to be
+done by someone with more expertise.  We will leave the ECAL and HCAL
+entries in GlobalPositionRcd as place-holders for the future.
+\end{itemize}
+
+\vfill
+\hspace{-0.83 cm} \textcolor{darkblue}{\Large Status}
+\begin{itemize}
+\item Settled on an implementation; I need to write it!
+\end{itemize}
+
+\label{numpages}
+\end{frame}
+
+\end{document}
